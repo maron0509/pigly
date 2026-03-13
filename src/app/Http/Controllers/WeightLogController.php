@@ -1,0 +1,95 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use App\Models\WeightLog;
+use App\Models\WeightTarget;
+use App\Models\User;
+use App\Http\Requests\WeightLogRequest;
+use App\Http\Requests\WeightLogUpdateRequest;
+
+
+class WeightLogController extends Controller
+{
+    public function index(Request $request)
+  {
+    $userId = Auth::id();
+    $query = WeightLog::where('user_id', $userId);
+
+
+    if ($request->start_date) {
+            $query->where('date', '>=', $request->start_date);
+        }
+
+    if ($request->end_date) {
+            $query->where('date', '<=', $request->end_date);
+        }
+
+        $weightLogs = $query->orderBy('date', 'desc')->paginate(8);;
+
+    // 目標体重
+    $target = WeightTarget::where('user_id', Auth::id())->first();
+    $targetWeight = $target ? $target->target_weight : null;
+    // 最新体重
+    $latest = WeightLog::where('user_id', Auth::id())
+            ->orderBy('date', 'desc')
+            ->first();
+
+$latestWeight = $latest ? $latest->weight : null;
+    // 目標まで
+    $remainingWeight = ($targetWeight ?? 0) - ($latestWeight ?? 0);
+
+    return view('index',compact('targetWeight',
+        'latestWeight',
+        'remainingWeight',
+        'weightLogs'));
+  }
+
+  public function store(WeightLogRequest $request)
+{
+    WeightLog::create([
+        'user_id' => Auth::id(),
+        'date' => $request->date,
+        'weight' => $request->weight,
+        'calorie' => $request->calorie,
+        'exercise_time' => $request->exercise_time,
+        'exercise_content' => $request->exercise_content,
+    ]);
+
+    return redirect('/weight_logs');
+  }
+public function goalSetting()
+    {
+        $target = WeightTarget::where('user_id', Auth::id())->first();
+
+        return view('goal', compact('target'));
+    }
+    public function update(WeightLogUpdateRequest $request, $weightLogId)
+    {
+         $weightLog = WeightLog::findOrFail($weightLogId);
+
+    $weightLog->update([
+        'date' => $request->date,
+        'weight' => $request->weight,
+        'calorie' => $request->calorie,
+        'exercise_time' => $request->exercise_time,
+        'exercise_content' => $request->exercise_content,
+    ]);
+
+        return redirect('/weight_logs');
+    }
+
+    public function destroy($weightLogId)
+{
+    WeightLog::findOrFail($weightLogId)->delete();
+
+    return redirect('/weight_logs');
+}
+
+    public function search(Request $request)
+{
+    return $this->index($request);
+}
+}
