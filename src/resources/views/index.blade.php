@@ -24,7 +24,7 @@
     </div>
   </div>
   <div>
-    <form class="search-form" action="/weight_logs" method="get">
+    <form action="/weight_logs/search" class="weight-logs__form" method="get">
       <div>
         <input type="date" name="start_date" value="{{ request('start_date') }}">～
         <input type="date" name="end_date" value="{{ request('end_date') }}">
@@ -35,25 +35,27 @@
       <a class="modal__create" href="#create-modal">データ追加</a>
     </div>
     
-    <table class="admin__table">
-      <tr class="admin__row">
-        <th class="admin__label">日付</th>
-        <th class="admin__label">体重</th>
-        <th class="admin__label">食事摂取カロリー</th>
-        <th class="admin__label">運動時間</th>
-      </tr>
-      @foreach($weightLogs as $weightLog)
-      <tr class="admin__row">
-        <td class="admin__data">{{$weightLog->date}}</td>
-        <td class="admin__data">{{$weightLog->weight}}</td>
-        <td class="admin__data">{{$weightLog->calorie}}</td>
-        <td class="admin__data">{{$weightLog->exercise_time}}</td>
-        <td class="admin__data">
-          <a class="admin__detail-btn" href="/weight_logs/{{$weightLog->id}}">詳細</a>
-        </td>
-      </tr>
-      @endforeach
-    </table>
+      <table class="admin__table">
+        <tr class="admin__row">
+          <th class="admin__label">日付</th>
+          <th class="admin__label">体重</th>
+          <th class="admin__label">食事摂取カロリー</th>
+          <th class="admin__label">運動時間</th>
+        </tr>
+        @foreach($weightLogs as $weightLog)
+        <tr class="admin__row">
+          <td class="admin__data">{{$weightLog->date}}</td>
+          <td class="admin__data">{{$weightLog->weight}}</td>
+          <td class="admin__data">{{$weightLog->calorie}}</td>
+          <td class="admin__data">{{$weightLog->exercise_time}}</td>
+          <td class="admin__data">
+            <a href="{{ route('weight_logs.show', $weightLog) }}" class="admin__detail-btn">
+            詳細</a>
+          </td>
+        </tr>
+        @endforeach
+      </table>
+    
       
     <div class="modal" id="create-modal">
       <a href="#" class="modal-overlay"></a>
@@ -114,11 +116,10 @@
 
             <input class="modal-form__create-btn" type="submit" value="登録">
           </form>
-            {{ $weightLogs->appends(request()->query())->links('vendor.pagination.bootstrap-4') }}
         </div>
       </div> 
     </div>
-      
+      {{ $weightLogs->appends(request()->query())->links('vendor.pagination.bootstrap-4') }}
   </div>
 </div>
 @endsection

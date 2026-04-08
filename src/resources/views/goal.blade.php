@@ -14,7 +14,7 @@
     <div>
       <input type="text" name="target_weight" value="{{ $target->target_weight ?? '' }}"><span>kg</span>
       <p class="weight_log-form__error-message">
-      @error('date')
+      @error('target_weight')
       {{ $message }}
       @enderror
       </p>

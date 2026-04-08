@@ -10,7 +10,9 @@
     <h2>Weight Log</h2>
   </div>
   <div class="all-contents">
-    <form class="detail-form" action="/weight_logs/{:weightLogId}/update" method="POST">
+    <form class="detail-form" action="{{ route('weight_logs.update', $weightLog) }}" method="POST">
+    @csrf
+    @method('PATCH')
       <div class="detail-form__group">
         <label class="detail-form__label" for="">日付</label>
         <input type="date" name="date" value="{{ old('date', $weightLog->date) }}">
@@ -57,15 +59,19 @@
         </p>
       </div>
       <div>
-        <a href="/" class="back" >戻る</a>
+        <a href="{{ route('weight_logs.index') }}" class="back">戻る</a>
         <button type="submit" class="button-change">更新</button>
-        <div class="trash-can-content">
-          <a href="/weight_logs/{:weightLogId}/delete">
-            <img src="{{ asset('/images/trash-can.png') }}" alt="ゴミ箱の画像" class="img-trash-can" />
-          </a>
-        </div>
       </div>
     </form>
+    <div class="trash-can-content">
+      <form action="{{ route('weight_logs.destroy', $weightLog) }}" method="POST" class="trash-can-content">
+      @csrf
+      @method('DELETE')
+        <button type="submit" style="border:none; background:none;">
+        <img src="{{ asset('/images/trash-can.png') }}" class="img-trash-can">
+        </button>
+      </form>
+    </div>
   </div>
 </div>
 @endsection

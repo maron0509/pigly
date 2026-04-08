@@ -60,15 +60,35 @@ $latestWeight = $latest ? $latest->weight : null;
 
     return redirect('/weight_logs');
   }
-public function goalSetting()
+  public function goalSettingForm()
+{
+    $target = WeightTarget::where('user_id', auth()->id())->first();
+    return view('goal', compact('target'));
+
+}
+public function goalSetting(Request $request)
     {
         $target = WeightTarget::where('user_id', Auth::id())->first();
 
-        return view('goal', compact('target'));
+        if ($target) {
+        // 更新
+        $target->update([
+            'target_weight' => $request->target_weight
+        ]);
+    } else {
+        // 新規作成
+        WeightTarget::create([
+            'user_id' => Auth::id(),
+            'target_weight' => $request->target_weight
+        ]);
     }
-    public function update(WeightLogUpdateRequest $request, $weightLogId)
+
+        return redirect('/weight_logs');
+    }
+    
+    public function update(WeightLogUpdateRequest $request, WeightLog $weightLog)
     {
-         $weightLog = WeightLog::findOrFail($weightLogId);
+        // $weightLog = WeightLog::findOrFail($weightLogId);
 
     $weightLog->update([
         'date' => $request->date,
@@ -78,18 +98,29 @@ public function goalSetting()
         'exercise_content' => $request->exercise_content,
     ]);
 
-        return redirect('/weight_logs');
+        return redirect()->route('weight_logs.index');
     }
 
-    public function destroy($weightLogId)
+    public function destroy(WeightLog $weightLog)
 {
-    WeightLog::findOrFail($weightLogId)->delete();
+    //WeightLog::findOrFail($weightLogId)->delete();
+    $weightLog->delete();
 
-    return redirect('/weight_logs');
+    return redirect()->route('weight_logs.index');
 }
 
     public function search(Request $request)
 {
     return $this->index($request);
 }
+
+public function show(WeightLog $weightLog)
+{
+    //$weightLog = WeightLog::findOrFail($weightLogId);
+
+    if ($weightLog->user_id !== auth()->id()) {
+        abort(403);
+    }
+        return view('detail', compact('weightLog'));
+ }
 }
